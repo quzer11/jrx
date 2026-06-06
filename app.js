@@ -13,3 +13,14 @@ function showQuiz(){document.getElementById('quiz').classList.remove('hidden');d
 function showMind(){document.getElementById('quiz').classList.add('hidden');document.getElementById('mindmap').classList.remove('hidden');renderMind()}
 function renderMind(){let filter=document.getElementById('termSearch').value.trim();let sections=QUESTION_BANK.mindmap||[];let tree='<div class="root-node">金融学总复习思维导图：名词—关系—考法</div>';sections.forEach(sec=>{let cnt=sec.items.filter(it=>!filter||it.term.includes(filter)||it.desc.includes(filter)||sec.chapter.includes(filter)).length;if(filter&&!cnt)return;let active=sec.chapter===state.mindChapter?'active':'';tree+='<div class="tree-chapter '+active+'" data-ch="'+esc(sec.chapter)+'"><b>'+esc(sec.chapter)+'</b><span>'+cnt+' 个核心名词</span></div>'});document.getElementById('mindTree').innerHTML=tree;document.querySelectorAll('.tree-chapter').forEach(el=>el.onclick=()=>{state.mindChapter=el.dataset.ch;renderMind()});let sec=sections.find(s=>s.chapter===state.mindChapter)||sections[0];let items=sec.items.filter(it=>!filter||it.term.includes(filter)||it.desc.includes(filter)||sec.chapter.includes(filter));if(filter){items=[];sections.forEach(s=>s.items.forEach(it=>{if(it.term.includes(filter)||it.desc.includes(filter)||s.chapter.includes(filter))items.push({...it,chapter:s.chapter})}))}let detail='<div class="detail-card"><h3>'+(filter?'搜索结果':'当前章节：'+esc(sec.chapter))+'</h3><p>每个节点都来自题库中反复考到的名词。先记“名词是什么意思”，再去做题会容易很多。</p></div><div class="term-grid">';items.forEach(it=>{detail+='<div class="term-node"><b>'+esc(it.term)+'</b><p>'+esc(it.desc)+'</p><span class="tag">'+esc(it.chapter||sec.chapter)+'</span></div>'});detail+='</div>';document.getElementById('mindDetail').innerHTML=detail}
 document.getElementById('showAnswer').onclick=showExplain;document.getElementById('nextBtn').onclick=()=>{if(state.index<state.order.length-1){state.index++;renderQuiz();}else{let ci=chapters.findIndex(c=>c.id===state.chapter);let ni=ci<chapters.length-1?ci+1:0;setChapter(chapters[ni].id);}};document.getElementById('prevBtn').onclick=()=>{state.index=(state.index-1+state.order.length)%state.order.length;renderQuiz()};document.getElementById('mapBtn').onclick=showMind;document.getElementById('quizBtn').onclick=showQuiz;document.getElementById('termSearch').oninput=renderMind;setChapter(chapters[0].id);renderMind();
+document.addEventListener('keydown',e=>{
+  if(document.activeElement&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA'))return;
+  if(document.getElementById('quiz').classList.contains('hidden'))return;
+  if(e.key==='ArrowRight'){document.getElementById('nextBtn').click();}
+  else if(e.key==='ArrowLeft'){document.getElementById('prevBtn').click();}
+  else if(e.key>='1'&&e.key<='4'){
+    const idx=parseInt(e.key)-1;
+    const btns=document.querySelectorAll('#options .option');
+    if(btns[idx])btns[idx].click();
+  }
+});
